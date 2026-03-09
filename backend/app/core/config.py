@@ -7,8 +7,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "ReAlign API"
-    VERSION: str = "1.0.0"
+    APP_NAME: str = "ReAlign API"
+    APP_VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     
     MONGODB_URL: str = os.getenv("MONGODB_URL", "")

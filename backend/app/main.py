@@ -1,3 +1,14 @@
+import sys
+
+class _SE:
+    pass
+class _ER:
+    pass
+class _FakeMain:
+    SimilarityEngine = _SE
+    EnsembleRecommender = _ER
+
+sys.modules['__mp_main__'] = _FakeMain()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -7,7 +18,7 @@ from .core.database import db
 from .api.endpoints import (
     patients, appointments, predictions, 
     similarity, recommendations, treatments,
-    therapists
+    therapists,  staff, auth
 )
 
 # Create FastAPI app
@@ -20,20 +31,22 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/api")
 app.include_router(patients.router, prefix="/api/v1")
 app.include_router(appointments.router, prefix="/api/v1")
 app.include_router(predictions.router, prefix="/api/v1")
 app.include_router(similarity.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
 app.include_router(treatments.router, prefix="/api/v1")
-app.include_router(therapists.router, prefix="/api/v1")  # Added this
+app.include_router(therapists.router, prefix="/api/v1")
+app.include_router(staff.router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
@@ -67,8 +80,12 @@ async def health_check():
         "database": "connected" if db.db else "disconnected",
         "timestamp": datetime.now().isoformat()
     }
+@app.on_event("startup")
+async def startup_event():
+    """Connect to database on startup"""
+    db.connect()
 
 @app.on_event("shutdown")
-def shutdown_event():
+async def shutdown_event():
     """Clean up on shutdown"""
     db.close()
