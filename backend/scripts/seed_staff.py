@@ -1,113 +1,86 @@
-# backend/scripts/seed_staff.py
-import asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime, timedelta
+from pymongo import MongoClient
 import os
-from dotenv import load_dotenv
+import sys
+import uuid
+from datetime import datetime, time
 
-load_dotenv()
+# Add parent directory to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-async def seed_staff():
-    # Connect to MongoDB
-    client = AsyncIOMotorClient(os.getenv("MONGODB_URL"))
-    db = client[os.getenv("DATABASE_NAME", "realign_db")]
+from app.core.config import settings
+
+def seed_therapists():
+    """Seed initial therapist data"""
+    print(f"Connecting to MongoDB: {settings.MONGODB_URL}")
+    client = MongoClient(settings.MONGODB_URL)
+    db = client[settings.DATABASE_NAME]
     
-    # Sample staff data
-    staff_members = [
+    # Therapist data (no login credentials)
+    therapists = [
         {
-            "name": "Dr. Sarah Smith",
-            "email": "sarah.smith@chirohouse.lk",
-            "phone": "+94 77 123 4567",
-            "specialization": "CHIRO",
-            "experience": 12,
-            "bio": "Dr. Smith specializes in sports injuries and spinal rehabilitation with over 12 years of experience.",
-            "hashed_password": "$2b$12$K8ZxQ8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8",  # password: password123
-            "createdAt": datetime.now(),
-            "availability": []
+            "therapist_id": str(uuid.uuid4()),
+            "name": "Dr. Sarah Chen",
+            "bio": "Dr. Chen specializes in spinal adjustments and sports injuries with over 10 years of experience.",
+            "is_available": True,
+            "createdAt": datetime.now()
         },
         {
-            "name": "Dr. Michael Chen",
-            "email": "michael.chen@chirohouse.lk",
-            "phone": "+94 77 234 5678",
-            "specialization": "PHYSIO",
-            "experience": 8,
-            "bio": "Dr. Chen is an expert in physiotherapy and rehabilitation, helping patients recover from injuries.",
-            "hashed_password": "$2b$12$K8ZxQ8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8",
-            "createdAt": datetime.now(),
-            "availability": []
+            "therapist_id": str(uuid.uuid4()),
+            "name": "Michael Perera",
+            "bio": "Certified massage therapist specializing in deep tissue, sports massage, and myofascial release.",
+            "is_available": True,
+            "createdAt": datetime.now()
         },
         {
-            "name": "Emma Wilson",
-            "email": "emma.wilson@chirohouse.lk",
-            "phone": "+94 77 345 6789",
-            "specialization": "MASSAGE",
-            "experience": 5,
-            "bio": "Emma specializes in deep tissue and sports massage therapy.",
-            "hashed_password": "$2b$12$K8ZxQ8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8",
-            "createdAt": datetime.now(),
-            "availability": []
-        },
-        {
-            "name": "Dr. James Brown",
-            "email": "james.brown@chirohouse.lk",
-            "phone": "+94 77 456 7890",
-            "specialization": "CHIRO",
-            "experience": 15,
-            "bio": "Dr. Brown has extensive experience in chiropractic care for chronic pain management.",
-            "hashed_password": "$2b$12$K8ZxQ8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8",
-            "createdAt": datetime.now(),
-            "availability": []
-        },
-        {
-            "name": "Dr. Lisa Kumar",
-            "email": "lisa.kumar@chirohouse.lk",
-            "phone": "+94 77 567 8901",
-            "specialization": "PHYSIO",
-            "experience": 6,
-            "bio": "Dr. Kumar focuses on post-surgery rehabilitation and sports physiotherapy.",
-            "hashed_password": "$2b$12$K8ZxQ8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8",
-            "createdAt": datetime.now(),
-            "availability": []
+            "therapist_id": str(uuid.uuid4()),
+            "name": "Dr. Amal Fernando",
+            "bio": "Dr. Fernando focuses on rehabilitation and movement therapy for post-injury recovery.",
+            "is_available": True,
+            "createdAt": datetime.now()
         }
     ]
     
-    # Clear existing staff
-    await db.staff.delete_many({})
+    # Insert therapists
+    result = db.therapists.insert_many(therapists)
+    print(f"✅ Inserted {len(result.inserted_ids)} therapists")
     
-    # Insert new staff
-    result = await db.staff.insert_many(staff_members)
-    print(f"Inserted {len(result.inserted_ids)} staff members")
+    # Sample availability
+    from datetime import date, timedelta
+    import random
     
-    # Generate availability for next 7 days
-    today = datetime.now()
-    for staff_id in result.inserted_ids:
-        availability = []
-        for i in range(7):
-            date = today + timedelta(days=i)
-            date_str = date.strftime("%Y-%m-%d")
+    availability = []
+    for therapist in therapists:
+        # Add 5 days of availability
+        for i in range(5):
+            avail_date = date.today() + timedelta(days=i+1)
             
-            # Generate time slots
-            slots = []
-            times = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"]
-            for time in times:
-                slots.append({
-                    "startTime": time,
-                    "endTime": str(int(time[:2]) + 1) + ":00",
-                    "isBooked": False
-                })
-            
+            # Morning slot
             availability.append({
-                "date": date_str,
-                "slots": slots
+                "availability_id": str(uuid.uuid4()),
+                "therapist_id": therapist["therapist_id"],
+                "date": avail_date.isoformat(),
+                "start_time": "09:00",
+                "end_time": "12:00",
+                "is_booked": False,
+                "createdAt": datetime.now()
             })
-        
-        await db.staff.update_one(
-            {"_id": staff_id},
-            {"$set": {"availability": availability}}
-        )
+            
+            # Afternoon slot
+            availability.append({
+                "availability_id": str(uuid.uuid4()),
+                "therapist_id": therapist["therapist_id"],
+                "date": avail_date.isoformat(),
+                "start_time": "14:00",
+                "end_time": "17:00",
+                "is_booked": False,
+                "createdAt": datetime.now()
+            })
     
-    print("Availability generated for next 7 days")
+    result = db.availability.insert_many(availability)
+    print(f"✅ Inserted {len(result.inserted_ids)} availability slots")
+    
     client.close()
+    print("✅ Therapist seeding completed")
 
 if __name__ == "__main__":
-    asyncio.run(seed_staff())
+    seed_therapists()
