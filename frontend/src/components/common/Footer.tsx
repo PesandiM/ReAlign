@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Link href="/" color="inherit" underline="hover">Home</Link>
-              <Link href="/symptom-check" color="inherit" underline="hover">Treatment Prediction</Link>
+              <Link href="/appointment-book" color="inherit" underline="hover">Book Appointments</Link>
               <Link href="https://www.thechirohouse.lk/" color="inherit" underline="hover" target="_blank" rel="noopener">About Us</Link>
               <Link href="/contact" color="inherit" underline="hover">Contact</Link>
             </Box>

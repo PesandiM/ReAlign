@@ -64,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick}) => {
                 Home
               </Button>
               <Button color="inherit" onClick={() => navigate('/symptom-check')}>
-                AI treatment recommendation
+                Treatment recommendation
               </Button>
               <Button color="inherit" onClick={onLoginClick}>
                 Book Appointment
