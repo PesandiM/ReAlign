@@ -16,9 +16,10 @@ import TCHLogo from '../../../src/utils/TCH-bg.png';
 
 interface HeaderProps {
   onLoginClick: () => void;
+  title?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
+const Header: React.FC<HeaderProps> = ({ onLoginClick}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
               src={TCHLogo}
               alt="The Chiro House Logo"
               sx={{
-                height: 50,
+                height: 100,
                 cursor: 'pointer'
               }}
               onClick={() => navigate('/')}
@@ -63,7 +64,10 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
                 Home
               </Button>
               <Button color="inherit" onClick={() => navigate('/symptom-check')}>
-                Symptom Check
+                AI treatment recommendation
+              </Button>
+              <Button color="inherit" onClick={onLoginClick}>
+                Book Appointment
               </Button>
               <Button 
                 variant="contained" 
