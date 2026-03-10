@@ -1,4 +1,4 @@
-# ReAlign — ReAlign: AI powered treatment prediction and appointment scheduling optimizer for The Chiro House
+# ReAlign: AI powered treatment prediction and appointment scheduling optimizer for The Chiro House
 
 ReAlign is a full-stack web application that combines AI-driven symptom analysis with appointment scheduling and staff management for a chiropractic clinic. Patients can check symptoms and receive treatment recommendations powered by machine learning, while staff and admins manage appointments, therapists, and availability through a dedicated portal.
 
